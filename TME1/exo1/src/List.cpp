@@ -1,23 +1,29 @@
-
+//FAUTE, il manque l'include
+#include "List.h"
 namespace pr {
 
 // ******************* Chainon
 Chainon::Chainon (const std::string & data, Chainon * next):data(data),next(next) {};
 
+//FAUTE, len n'est jamais retourné, mais à la place la fonction length() est encore appelé: boucle
 size_t Chainon::length() {
 	size_t len = 1;
 	if (next != nullptr) {
 		len += next->length();
 	}
-	return length();
+	return len;
 }
 
-void Chainon::print (std::ostream & os) {
+//FAUTE, il manque la déclaration const, comme dans le prototype du .h
+//FAUTE, next->print(os) était appelé tout le temps, le if n'arrete pas les appels récursifs
+//compte comme 1 seul faute ?
+void Chainon::print (std::ostream & os) const {
 	os << data ;
 	if (next != nullptr) {
 		os << ", ";
+		next->print(os);
 	}
-	next->print(os);
+	return;
 }
 
 // ******************  List
@@ -45,7 +51,8 @@ void List::push_front (const std::string& val) {
 	tete = new Chainon(val,tete);
 }
 
-bool empty() {
+//FAUTE, il manque List:: comme empty en est une fonction de cette classe
+bool List::empty() {
 	return tete == nullptr;
 }
 
@@ -57,8 +64,7 @@ size_t List::size() const {
 	}
 }
 
-} // namespace pr
-
+//FAUTE, la redéfinition de l'opérateur pour les List est censé être dans l'espace de nom 'pr'
 std::ostream & operator<< (std::ostream & os, const pr::List & vec)
 {
 	os << "[";
@@ -68,4 +74,7 @@ std::ostream & operator<< (std::ostream & os, const pr::List & vec)
 	os << "]";
 	return os;
 }
+
+} // namespace pr
+
 
