@@ -84,7 +84,7 @@ int main () {
 		*/
 
 		// 3)
-		f3(v, word);
+		f3(w_occur, word);
 
 		
 	}
