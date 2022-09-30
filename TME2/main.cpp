@@ -4,13 +4,11 @@
 #include <chrono>
 #include <vector>
 
-bool f2(std::vector<std::string> &v, const std::string &s) {
+void f2(std::vector<std::string> &v, const std::string &s) {
 	auto it = find(v.begin(), v.end(), s);
 	if(it == v.end()) {
 		v.push_back(s);
-		return true;
 	}
-	return false;
 }
 
 void f3(std::vector<std::pair<std::string, int>> &v, const std::string &s) {
@@ -27,10 +25,6 @@ void f3(std::vector<std::pair<std::string, int>> &v, const std::string &s) {
 	}
 }
 
-bool f3_print_lambda(const auto &pair) {
-	return pair.first == s
-}
-
 //print les mots
 void f3_print(const std::vector<std::pair<std::string, int>> &v) {
 	//war
@@ -38,6 +32,8 @@ void f3_print(const std::vector<std::pair<std::string, int>> &v) {
 	//toto
 	for(auto it = v.begin(), end_it=v.end(); it != end_it; ++it) {
 		std::pair<std::string, int> p = *it;
+		if(p.first == "war" || p.first == "peace" || p.first == "toto")
+			std::cout << p.first << " --- " << p.second << std::endl;
 	}
 }
 
@@ -51,7 +47,7 @@ int main () {
 	//std::vector<std::string> w_diff;
 
 	// 3)
-	vector<pair<string, int>> w_occur;
+	//vector<pair<string, int>> w_occur;
 
 
 	auto start = steady_clock::now();
@@ -69,24 +65,28 @@ int main () {
 		transform(word.begin(),word.end(),word.begin(),::tolower);
 
 		// word est maintenant "tout propre"
-		/* -----
+		// ---------------------------
+		///*
 		if (nombre_lu % 100 == 0)
 			// on affiche un mot "propre" sur 100
 			cout << nombre_lu << ": "<< word << endl;
 		nombre_lu++;
-		-----
-		*/
+		//*/
+		// ---------------------------
+
 
 	    // 2) O(n²)
 		/*
-		if(f2(w_diff, word))
-			nombre_lu++;
+		f2(w_diff, word)
+		++nombre_lu;
 		*/
 
 		// 3)
+		/*
 		f3(w_occur, word);
-
-		
+		++nombre_lu;
+		*/
+	
 	}
 	input.close();
 
@@ -98,7 +98,9 @@ int main () {
               << "ms.\n";
 
     cout << "Found a total of " << nombre_lu << " words." << endl;
-	
+
+	// 3)
+	//f3_print(w_occur);
 
     return 0;
 }

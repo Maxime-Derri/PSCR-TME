@@ -1,2 +1,5 @@
 1) il y a 566193 mots
 2) il y en a 20333
+4) La complexité est la même que pour la question 2: O(n²), car on parcours tous le text, et à chaque mot, on parcours tout le vecteur (de pair)
+pour vérifier si le mot est déjà dedans ou non. Verifier si le mot est dans le vecteur prend beaucoup de temps sur une entrée de taille conséquente.
+D'autres structures tel que list ou forward_list auraient pu être utilisées.
