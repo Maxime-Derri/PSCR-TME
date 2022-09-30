@@ -6,6 +6,7 @@
 #include <vector>
 #include <forward_list>
 #include <functional>
+#include <iostream>
 
 template<typename K, typename V>
 class HashMap {
@@ -26,8 +27,15 @@ class HashMap {
         }
     }
 
-    V *get(const k &key) {
-        std::size_t n = std::hash<k>()(key) % buckets_t.size();
+    V *get(const K &key) {
+        std::size_t sz = buckets_t.size();
+        std::size_t n = std::hash<K>()(key) % sz;
+        auto tmp = buckets_t[n];
+
+        for(auto it = tmp.begin(), end_ = tmp.end(); it!=end_; ++it) {
+            if(it->first == key)
+                std::cout << std::endl;
+        }
         
     }
 
