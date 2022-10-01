@@ -3,6 +3,8 @@
 #include <regex>
 #include <chrono>
 #include <vector>
+#include <algorithm>
+#include "hash_map.h"
 
 void f2(std::vector<std::string> &v, const std::string &s) {
 	auto it = find(v.begin(), v.end(), s);
@@ -37,6 +39,33 @@ void f3_print(const std::vector<std::pair<std::string, int>> &v) {
 	}
 }
 
+void f6(const HashMap<std::string,int> &map) {
+	//war
+	//peace
+	//toto
+	
+	// print directement ok, stocker et print non ??
+	/*
+	int *n1 = map.get("war");
+	int *n2 = map.get("peace");
+	int *n3 = map.get("toto");
+	
+	//je passe les détails de si n1 et n2 sont nullptr pour aller plus vite
+	//il n'y a que toto qui l'est
+	std::cout << "war: " << *n1 << std::endl;
+	std::cout << "peace: " << *n2 << std::endl;
+
+	int nb = (n3 == nullptr)? 0 : *n3;
+	std::cout << "toto: " << nb << std::endl;
+	*/
+
+
+	std::cout << "war: " << *map.get("war") << std::endl;
+	std::cout << "peace: " << *map.get("peace") << std::endl;
+	//seg fault std::cout << "toto: " << *map.get("toto") << std::endl;
+}
+
+
 int main () {
 	using namespace std;
 	using namespace std::chrono;
@@ -48,6 +77,10 @@ int main () {
 
 	// 3)
 	//vector<pair<string, int>> w_occur;
+
+	// 6)
+	HashMap<std::string, int> map;
+
 
 
 	auto start = steady_clock::now();
@@ -70,7 +103,6 @@ int main () {
 		if (nombre_lu % 100 == 0)
 			// on affiche un mot "propre" sur 100
 			cout << nombre_lu << ": "<< word << endl;
-		nombre_lu++;
 		//*/
 		// ---------------------------
 
@@ -78,15 +110,26 @@ int main () {
 	    // 2) O(n²)
 		/*
 		f2(w_diff, word)
-		++nombre_lu;
 		*/
 
 		// 3)
 		/*
 		f3(w_occur, word);
-		++nombre_lu;
 		*/
 	
+		// 6)
+		int *nb_get = map.get(word);
+		//int nb = (nb_get==nullptr)? 0 : *nb_get;
+		int nb;
+		if(nb_get==nullptr)
+			nb = 0;
+		else
+			nb = *nb_get;
+		++nb;
+		map.put(word, nb);
+
+
+		++nombre_lu;
 	}
 	input.close();
 
@@ -101,6 +144,26 @@ int main () {
 
 	// 3)
 	//f3_print(w_occur);
+
+	// 6)
+	//f6(map); -> non
+	/* -> oui
+	map.print_entry("war");
+	map.print_entry("peace");
+	map.print_entry("toto");
+	*/
+
+	// 7)
+	/*
+	auto vec = map.f7();
+	std::cout << vec.size() << " " << map.size() << std::endl;
+	*/
+
+	// 8)
+	/*
+	map.f8(vec);
+	*/
+
 
     return 0;
 }
