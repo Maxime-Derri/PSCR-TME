@@ -4,16 +4,18 @@
 #include <chrono>
 #include <vector>
 #include <algorithm>
+#include <iterator>
 #include "hash_map.h"
 
-void f2(std::vector<std::string> &v, const std::string &s) {
+//TME2
+void f2_tme2(std::vector<std::string> &v, const std::string &s) {
 	auto it = find(v.begin(), v.end(), s);
 	if(it == v.end()) {
 		v.push_back(s);
 	}
 }
 
-void f3(std::vector<std::pair<std::string, int>> &v, const std::string &s) {
+void f3_tme2(std::vector<std::pair<std::string, int>> &v, const std::string &s) {
 	auto it = find_if(v.begin(), v.end(),
 		[&](const auto &pair) {
 			return pair.first == s;
@@ -28,7 +30,7 @@ void f3(std::vector<std::pair<std::string, int>> &v, const std::string &s) {
 }
 
 //print les mots
-void f3_print(const std::vector<std::pair<std::string, int>> &v) {
+void f3_print_tme2(const std::vector<std::pair<std::string, int>> &v) {
 	//war
 	//peace
 	//toto
@@ -39,13 +41,11 @@ void f3_print(const std::vector<std::pair<std::string, int>> &v) {
 	}
 }
 
-void f6(const HashMap<std::string,int> &map) {
+void f6_tme2(HashMap<std::string,int> &map) {
 	//war
 	//peace
 	//toto
 	
-	// print directement ok, stocker et print non ??
-	/*
 	int *n1 = map.get("war");
 	int *n2 = map.get("peace");
 	int *n3 = map.get("toto");
@@ -57,12 +57,46 @@ void f6(const HashMap<std::string,int> &map) {
 
 	int nb = (n3 == nullptr)? 0 : *n3;
 	std::cout << "toto: " << nb << std::endl;
-	*/
+}
 
 
-	std::cout << "war: " << *map.get("war") << std::endl;
-	std::cout << "peace: " << *map.get("peace") << std::endl;
-	//seg fault std::cout << "toto: " << *map.get("toto") << std::endl;
+//TME3
+
+// 1)
+template<typename iterator>
+size_t count(iterator begin, iterator end) {
+	//return end - begin;
+	size_t ct = 0;
+	while(begin != end) {
+		//std::cout << "aaa" << std::endl;
+		++ct;
+		++begin;
+	}
+	return ct;
+}
+
+// 2)
+template<typename iterator, typename T>
+size_t count_if_equal(iterator begin, iterator end, const T &val) {
+	size_t ct = 0;
+	while(begin++ < end) {
+		if(*begin == val)
+			++ct;
+	}
+	return ct;
+}
+
+// 3)
+void f3_tme3(const size_t nb_w, HashMap<std::string, int> &map) {
+	auto ct = count(map.get_buckets_t().begin(), map.get_buckets_t().end());
+	std::cout << "nbr buckets: " << map.size() << " | " << ct << std::endl;
+
+	ct = 0;
+	for(auto it=map.get_buckets_t().begin(), end=map.get_buckets_t().end(); it != end; ++it) {
+		ct += count(it->begin(), it->end());
+	}
+	std::cout << "nbr mots: " << nb_w << " | mots uniques: " << ct << std::endl;
+
 }
 
 
@@ -72,6 +106,7 @@ int main () {
 
 	ifstream input = ifstream(/*/"tmp/ */"WarAndPeace.txt");
 
+	//TME2
 	// 2)
 	//std::vector<std::string> w_diff;
 
@@ -99,14 +134,14 @@ int main () {
 
 		// word est maintenant "tout propre"
 		// ---------------------------
-		///*
+		/*
 		if (nombre_lu % 100 == 0)
 			// on affiche un mot "propre" sur 100
 			cout << nombre_lu << ": "<< word << endl;
-		//*/
+		*/
 		// ---------------------------
 
-
+		//TME2
 	    // 2) O(n²)
 		/*
 		f2(w_diff, word)
@@ -142,12 +177,13 @@ int main () {
 
     cout << "Found a total of " << nombre_lu << " words." << endl;
 
+	//TME2
 	// 3)
 	//f3_print(w_occur);
 
 	// 6)
-	//f6(map); -> non
-	/* -> oui
+	/*
+	f6(map);
 	map.print_entry("war");
 	map.print_entry("peace");
 	map.print_entry("toto");
@@ -164,6 +200,10 @@ int main () {
 	map.f8(vec);
 	*/
 
+
+
+	//TME3
+	f3_tme3(nombre_lu, map);
 
     return 0;
 }

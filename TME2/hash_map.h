@@ -11,15 +11,21 @@
 
 template<typename K, typename V>
 class HashMap {
-    class Entry {
-        public:
-            const K key;
-            V value;
-            Entry(const K k, V v): key(k), value(v) {}
-    };
-    
-    typename std::vector<std::forward_list<Entry>> buckets_t;
-    
+    private:
+        class Entry {
+            public:
+                const K key;
+                V value;
+
+                Entry(const K k, V v): key(k), value(v) {}
+
+                bool operator==(Entry test) {
+                    return this.K == test.K && this.V == test.V;
+                }
+        };
+        
+        typename std::vector<std::forward_list<Entry>> buckets_t;
+
     public:
         HashMap(std::size_t init=100) {
             buckets_t.reserve(init);
@@ -29,10 +35,10 @@ class HashMap {
             }
         }
 
-        V *get(const K &key) const {
+        V *get(const K &key) {
             std::size_t sz = buckets_t.size();
             std::size_t n = std::hash<K>()(key) % sz;
-            auto tmp = buckets_t[n];
+            auto &tmp = buckets_t[n];
 
             for(typename std::forward_list<Entry>::iterator it = tmp.begin(), end = tmp.end(); it!=end; ++it) {
                 if(it->key == key)
@@ -77,7 +83,7 @@ class HashMap {
                 std::cout << word << ": " << *val << std::endl;
         }
 
-        std::vector<std::pair<std::string,int>> f7() const {
+        std::vector<std::pair<std::string,int>> f7_tme2() const {
             std::vector<std::pair<std::string,int>> cpy;
             cpy.reserve(buckets_t.size());
             
@@ -89,7 +95,7 @@ class HashMap {
             return cpy;
         }
 
-        void f8(std::vector<std::pair<std::string,int>> &vec) const {
+        void f8_tme2(std::vector<std::pair<std::string,int>> &vec) const {
 	        std::sort(vec.begin(), vec.end(), [](const auto &p1, const auto &p2) {
 		        return p1.second > p2.second;
 	        });
@@ -98,5 +104,14 @@ class HashMap {
                 std::cout << it->first << ": " << it->second << std::endl;
 	        }
         }
+
+
+
+        //TME 3
+
+        std::vector<std::forward_list<HashMap<K, V>::Entry>> &get_buckets_t() {
+            return buckets_t;
+        }
+
 
 };
