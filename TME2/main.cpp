@@ -2,9 +2,7 @@
 #include <fstream>
 #include <regex>
 #include <chrono>
-#include <vector>
 #include <algorithm>
-#include <iterator>
 #include "hash_map.h"
 
 //TME2
@@ -59,6 +57,16 @@ void f6_tme2(HashMap<std::string,int> &map) {
 	std::cout << "toto: " << nb << std::endl;
 }
 
+void f8_tme2(std::vector<std::pair<std::string,int>> &vec) {
+	std::sort(vec.begin(), vec.end(), [](const auto &p1, const auto &p2) {
+	return p1.second > p2.second;
+    });
+
+    for(auto it=vec.begin(), end=vec.begin()+10; it!= end; ++it) {
+        std::cout << it->first << ": " << it->second << std::endl;
+    }
+}
+
 
 //TME3
 
@@ -68,7 +76,6 @@ size_t count(iterator begin, iterator end) {
 	//return end - begin;
 	size_t ct = 0;
 	while(begin != end) {
-		//std::cout << "aaa" << std::endl;
 		++ct;
 		++begin;
 	}
@@ -88,17 +95,28 @@ size_t count_if_equal(iterator begin, iterator end, const T &val) {
 
 // 3)
 void f3_tme3(const size_t nb_w, HashMap<std::string, int> &map) {
-	auto ct = count(map.get_buckets_t().begin(), map.get_buckets_t().end());
+	auto ct = count(map.get_buckets().begin(), map.get_buckets().end());
 	std::cout << "nbr buckets: " << map.size() << " | " << ct << std::endl;
 
 	ct = 0;
-	for(auto it=map.get_buckets_t().begin(), end=map.get_buckets_t().end(); it != end; ++it) {
+	for(auto it=map.get_buckets().begin(), end=map.get_buckets().end(); it != end; ++it) {
 		ct += count(it->begin(), it->end());
 	}
 	std::cout << "nbr mots: " << nb_w << " | mots uniques: " << ct << std::endl;
 
 }
 
+// 5)
+
+std::vector<std::pair<std::string,int>> f5_tme3(HashMap<std::string, int> &map) {
+	std::vector<std::pair<std::string, int>> vec;
+	vec.reserve(map.get_buckets().size());
+	for(auto it=map.begin(), end=map.end(); it != end; ++it) {
+		auto e = *it;
+		vec.push_back(std::pair(e.key, e.value));
+	}
+	return vec;
+}
 
 int main () {
 	using namespace std;
@@ -143,15 +161,13 @@ int main () {
 
 		//TME2
 	    // 2) O(n²)
-		/*
-		f2(w_diff, word)
-		*/
+		//f2_tme2(w_diff, word)
+		
 
 		// 3)
-		/*
-		f3(w_occur, word);
-		*/
-	
+		
+		//f3_tme2(w_occur, word);
+		
 		// 6)
 		int *nb_get = map.get(word);
 		//int nb = (nb_get==nullptr)? 0 : *nb_get;
@@ -183,27 +199,34 @@ int main () {
 
 	// 6)
 	/*
-	f6(map);
+	f6_tme2(map);
 	map.print_entry("war");
 	map.print_entry("peace");
 	map.print_entry("toto");
 	*/
 
 	// 7)
-	/*
-	auto vec = map.f7();
-	std::cout << vec.size() << " " << map.size() << std::endl;
-	*/
+	
+	//auto vec = map.f7_tme2();
+	//std::cout << vec.size() << " " << map.size() << std::endl;
 
 	// 8)
-	/*
-	map.f8(vec);
-	*/
+	//f8_tme2(vec);
 
 
 
 	//TME3
-	f3_tme3(nombre_lu, map);
+
+	// 3)
+	//f3_tme3(nombre_lu, map);
+
+	// 5) et 6)
+	//auto vec = map.f7_tme2();
+	//f8_tme2(vec);
+	//std::cout << "------------" << std::endl;
+	//auto vecc = f5_tme3(map);
+	//f8_tme2(vecc);
+
 
     return 0;
 }
