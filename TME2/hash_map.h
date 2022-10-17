@@ -34,7 +34,7 @@ class HashMap {
         class Iterator_hm { //TODO comment instancier un objet sans passer par begin() ?
             private:
                 buckets_t buckets;
-                typename std::vector<std::forward_list<HashMap<K, V>::Entry>>::iterator vit;
+                typename std::vector<std::forward_list<HashMap<K, V>::Entry>>::iterator vit; //typedef puis declaration
                 typename std::forward_list<HashMap<K, V>::Entry>::iterator lit;
 
             public:
