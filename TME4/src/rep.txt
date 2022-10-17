@@ -1,0 +1,4 @@
+2) l'implementation est sans deadlock, mais on peut avoir accès à un compte avant que le credit n'ai lieu, et juste après compte crédité ~
+ -> on peut voir compte débité et l'autre compte pas encore crédité
+
+ 5) bloquage car on essaie de lock dans le débit / credit sur un mutex deja utilisé.
