@@ -7,11 +7,20 @@ using namespace std;
 namespace pr {
 
 void Banque::transfert(size_t deb, size_t cred, unsigned int val) {
+	// 4)
 	Compte & debiteur = comptes[deb];
 	Compte & crediteur = comptes[cred];
+	//std::lock(crediteur.getMutex(), debiteur.getMutex()); 6) peut deadlock si i et j essaient de s'accéder l'un l'autre: commutation et sur architecture multi_coeur
+	//debiteur.getMutex().lock();
+	while(!debiteur.getMutex().try_lock()) {
+		std::this_thread::yield();
+	}
+	crediteur.getMutex().lock();
 	if (debiteur.debiter(val)) {
 		crediteur.crediter(val);
 	}
+	debiteur.getMutex().unlock();
+	crediteur.getMutex().unlock();
 }
 size_t Banque::size() const {
 	return comptes.size();
