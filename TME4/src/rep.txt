@@ -2,3 +2,10 @@
  -> on peut voir compte débité et l'autre compte pas encore crédité
 
  5) bloquage car on essaie de lock dans le débit / credit sur un mutex deja utilisé.
+ 6) Les processurs peuvent se bloquer entre eux.
+ Soit a et b (débiteur et créditeur)
+ T1(a,b) et T2(b,a)
+ => chacun va bloquer l'un de ses deux arg, et au moment de bloquer le deuxième (1er arg bloqué des deux côté), une deadlock se produit
+
+ 7) non, car pendant que le thread comptable sera sur le compte i+3, il est possible qu'un transfert entre le compte i+4 et i+2 soit fait
+ car ils ne seront pas bloqués, et dans ce cas la le bilan sera faux.

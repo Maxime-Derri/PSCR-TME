@@ -23,9 +23,10 @@ bool Compte::debiter (unsigned int val) {
 
 int Compte::getSolde() const  {
 	//unique_lock<mutex> g(m);  6)
-	m.lock();
+	unique_lock<std::recursive_mutex> g(m);
+	//m.lock();
 	return solde;
-	m.unlock();
+	//m.unlock();
 }
 
 // NB : vector exige Copyable, mais mutex ne l'est pas...
@@ -34,6 +35,7 @@ Compte::Compte(const Compte & other) {
 	solde = other.solde;
 	other.m.unlock();
 }
+
 
 std::recursive_mutex &Compte::getMutex() {
 	return m;

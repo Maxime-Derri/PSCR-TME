@@ -7,7 +7,7 @@ namespace pr {
 class Compte {
 	mutable std::recursive_mutex m;
 	int solde;
-public :
+public:
 	Compte(int solde=0):solde(solde) {}
 	Compte(const Compte & other);
 	void crediter (unsigned int val) ;
