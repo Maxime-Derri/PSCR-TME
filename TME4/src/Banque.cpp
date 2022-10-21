@@ -9,6 +9,8 @@ using namespace std;
 namespace pr {
 
 void Banque::transfert(size_t deb, size_t cred, unsigned int val) {
+	//autre solution: utiliser les indices if(i < j) i.lock(), j.lock() else j.lock(), i.lock()
+	
 	//test.lock(); // 6) idée de correction 1*
 	// 4)
 	Compte & debiteur = comptes[deb];
