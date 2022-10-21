@@ -3,6 +3,14 @@
 
 #include <cstdlib>
 #include <mutex>
+#include <condition_variable>
+
+
+//notify_one quand on a l'assurance de notifier le bon thread (ex: 2 cond_var)
+//notify_all quand on à une cond_var -> les threads qui peuvent continuer le font et les autres
+//reboucle sur wait
+
+
 
 namespace pr {
 
@@ -14,6 +22,8 @@ class Queue {
 	size_t begin;
 	size_t sz;
 	mutable std::mutex m;
+	bool block;
+	std::condition_variable cv;
 
 	// fonctions private, sans protection mutex
 	bool empty() const {
@@ -23,7 +33,7 @@ class Queue {
 		return sz == allocsize;
 	}
 public:
-	Queue(size_t size) :allocsize(size), begin(0), sz(0) {
+	Queue(size_t size) :allocsize(size), begin(0), sz(0), block(true) {
 		tab = new T*[size];
 		memset(tab, 0, size * sizeof(T*));
 	}
@@ -33,9 +43,20 @@ public:
 	}
 	T* pop() {
 		std::unique_lock<std::mutex> lg(m);
+		/*
 		if (empty()) {
 			return nullptr;
 		}
+		*/
+
+		while(empty() && !block) { //bloquant -> false
+			cv.wait(lg);
+		}
+		if(empty()) {
+			return nullptr;
+		}
+		cv.notify_all();
+
 		auto ret = tab[begin];
 		tab[begin] = nullptr;
 		sz--;
@@ -44,12 +65,24 @@ public:
 	}
 	bool push(T* elt) {
 		std::unique_lock<std::mutex> lg(m);
+		/*
 		if (full()) {
 			return false;
+		}*/
+
+		while(full()) {
+			cv.wait(lg);
 		}
+		cv.notify_all();
+
 		tab[(begin + sz) % allocsize] = elt;
 		sz++;
 		return true;
+	}
+	void set_blocking(bool isBlock) {
+		std::unique_lock<std::mutex> lg(m);
+		block = isBlock();
+		cv.notify_one();
 	}
 	~Queue() {
 		// ?? lock a priori inutile, ne pas detruire si on travaille encore avec

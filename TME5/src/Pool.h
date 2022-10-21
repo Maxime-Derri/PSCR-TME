@@ -15,6 +15,7 @@ public:
 	void start (int nbthread);
 	void submit (Job * job) ;
 	void stop() ;
+	void poolWorker(Queue<Job> &queue);
 	~Pool() ;
 };
 
