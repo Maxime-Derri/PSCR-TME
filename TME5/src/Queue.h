@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <mutex>
 #include <condition_variable>
+#include <cstring>
+#include <iostream>
 
 
 //notify_one quand on a l'assurance de notifier le bon thread (ex: 2 cond_var)
@@ -49,10 +51,10 @@ public:
 		}
 		*/
 
-		while(empty() && !block) { //bloquant -> false
+		while(empty() && block) { //bloquant -> block = true
 			cv.wait(lg);
 		}
-		if(empty()) {
+		if(empty() && !block) {
 			return nullptr;
 		}
 		cv.notify_all();
@@ -81,8 +83,8 @@ public:
 	}
 	void set_blocking(bool isBlock) {
 		std::unique_lock<std::mutex> lg(m);
-		block = isBlock();
-		cv.notify_one();
+		block = isBlock;
+		cv.notify_all();
 	}
 	~Queue() {
 		// ?? lock a priori inutile, ne pas detruire si on travaille encore avec

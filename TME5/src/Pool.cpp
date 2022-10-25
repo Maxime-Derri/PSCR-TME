@@ -4,18 +4,20 @@
 
 pr::Pool::Pool(int qsize): queue(qsize)  {}
 
-void pr::Pool::poolWorker(Queue<Job> &queue) {
+void pr::poolWorker(Queue<Job> &queue) {
     while(true) {
         Job *j = queue.pop();
-        if(j==nullptr) break;
+        if(j==nullptr)
+            break;
         j->run();
         delete j;
     }
 }
 
 void pr::Pool::start(int nbthread) {
-    for(int i = 0; i < nbthread; ++i)
+    for(int i = 0; i < nbthread; ++i) {
         threads.emplace_back(poolWorker, std::ref(queue));
+    }
 }
 
 void pr::Pool::stop() {

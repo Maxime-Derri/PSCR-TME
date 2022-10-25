@@ -4,6 +4,8 @@
 #include <thread>
 #include <chrono>
 
+#include "Job.h"
+
 namespace pr {
 
 class Job {
@@ -33,7 +35,5 @@ public :
 	}
 	~SleepJob(){}
 };
-
-//creer PixelJOb
 
 }

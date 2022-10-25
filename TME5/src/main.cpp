@@ -1,19 +1,30 @@
 #include "Vec3D.h"
 #include "Rayon.h"
 #include "Scene.h"
+#include "Job.h"
+#include "Queue.h"
+#include "Pool.h"
+
 #include <iostream>
 #include <algorithm>
 #include <fstream>
 #include <limits>
 #include <random>
 
+
+
+
+
 using namespace std;
 using namespace pr;
 
+const int NB_THREADS = 10;
+const int QSIZE = 10000;
+const int MODE = 1; //0: base, 1: pixel, 2: ligne
 
 void fillScene(Scene & scene, default_random_engine & re) {
 	// Nombre de spheres (rend le probleme plus dur)
-	const int NBSPHERES = 250;
+	const int NBSPHERES = 250; //250
 
 	// on remplit la scene de spheres colorees de taille position et couleur aleatoire
 	uniform_int_distribution<int> distrib(0, 200);
@@ -98,6 +109,52 @@ void exportImage(const char * path, size_t width, size_t height, Color * pixels)
 	img.close();
 }
 
+
+
+
+
+class PixelJob : public Job {
+	void calcul() {
+		auto & screenPoint = screen[y][x];
+		Rayon  ray(scene.getCameraPos(), screenPoint);
+		int targetSphere = findClosestInter(scene, ray);
+		
+		if (targetSphere == -1) {
+			// keep background color
+			return;
+
+		} else {
+			const Sphere & obj = *(scene.begin() + targetSphere);
+			// pixel prend la couleur de l'objet
+			Color finalcolor = computeColor(obj, ray, scene.getCameraPos(), lights);
+				// le point de l'image (pixel) dont on vient de calculer la couleur
+			Color & pixel = pixels[y*scene.getHeight() + x];
+			// mettre a jour la couleur du pixel dans l'image finale.
+			pixel = finalcolor;
+		}
+	}
+
+	void run() {
+		calcul();
+	}
+
+	const Scene::screen_t &screen;
+	Scene &scene;
+	int x;
+	int y;
+	vector<Vec3D> &lights;
+	Color *pixels;
+
+	public:
+		 PixelJob(const Scene::screen_t &scr, Scene sce, int x_, int y_, vector<Vec3D> l, Color *p): screen(scr), scene(sce), x(x_), y(y_), lights(l), pixels(p) {}
+		~PixelJob() {}
+
+};
+
+
+
+
+
 // NB : en francais pour le cours, preferez coder en english toujours.
 // pas d'accents pour eviter les soucis d'encodage
 
@@ -107,7 +164,7 @@ int main () {
 	// on pose une graine basee sur la date
 	default_random_engine re(std::chrono::system_clock::now().time_since_epoch().count());
 	// definir la Scene : resolution de l'image
-	Scene scene (1000,1000);
+	Scene scene (1000,1000); // 1000 1000
 	// remplir avec un peu d'aléatoire
 	fillScene(scene, re);
 	
@@ -125,31 +182,50 @@ int main () {
 	// Les couleurs des pixels dans l'image finale
 	Color * pixels = new Color[scene.getWidth() * scene.getHeight()];
 
+
+	Queue<Job> queue(QSIZE);
+	Pool p(QSIZE);
+	/* MODE=1 //PIXEL
+	*/
+	p.start(NB_THREADS);
+
+
 	// pour chaque pixel, calculer sa couleur
 	for (int x =0 ; x < scene.getWidth() ; x++) {
 		for (int  y = 0 ; y < scene.getHeight() ; y++) {
-			// le point de l'ecran par lequel passe ce rayon
-			auto & screenPoint = screen[y][x];
-			// le rayon a inspecter
-			Rayon  ray(scene.getCameraPos(), screenPoint);
+			if(MODE == 0) { //BASE
+				// le point de l'ecran par lequel passe ce rayon
+				auto & screenPoint = screen[y][x];
+				// le rayon a inspecter
+				Rayon  ray(scene.getCameraPos(), screenPoint);
+				int targetSphere = findClosestInter(scene, ray);
 
-			int targetSphere = findClosestInter(scene, ray);
+				if (targetSphere == -1) {
+					// keep background color
+					continue ;
+					
+				} else {
+					const Sphere & obj = *(scene.begin() + targetSphere);
+					// pixel prend la couleur de l'objet
+					Color finalcolor = computeColor(obj, ray, scene.getCameraPos(), lights);
+					// le point de l'image (pixel) dont on vient de calculer la couleur
+					Color & pixel = pixels[y*scene.getHeight() + x];
+					// mettre a jour la couleur du pixel dans l'image finale.
+					pixel = finalcolor;
+				}
 
-			if (targetSphere == -1) {
-				// keep background color
-				continue ;
-			} else {
-				const Sphere & obj = *(scene.begin() + targetSphere);
-				// pixel prend la couleur de l'objet
-				Color finalcolor = computeColor(obj, ray, scene.getCameraPos(), lights);
-				// le point de l'image (pixel) dont on vient de calculer la couleur
-				Color & pixel = pixels[y*scene.getHeight() + x];
-				// mettre a jour la couleur du pixel dans l'image finale.
-				pixel = finalcolor;
 			}
-
+			else if(MODE == 1) { //PIXEL
+				PixelJob *pxl = new PixelJob(std::ref(screen), std::ref(scene), x, y, std::ref(lights), std::ref(pixels));
+				p.submit(pxl);
+			}
 		}
 	}
+	/* MODE=1 //PIXEL
+	*/
+	std::cout << "fin" << std::endl;
+	queue.set_blocking(false);
+	p.stop();
 
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	    std::cout << "Total time "
@@ -160,4 +236,3 @@ int main () {
 
 	return 0;
 }
-
