@@ -18,9 +18,9 @@
 using namespace std;
 using namespace pr;
 
-const int NB_THREADS = 10;
+const int NB_THREADS = 25;
 const int QSIZE = 10000;
-const int MODE = 1; //0: base, 1: pixel, 2: ligne
+const int MODE = 2; //0: base, 1: pixel, 2: ligne
 
 void fillScene(Scene & scene, default_random_engine & re) {
 	// Nombre de spheres (rend le probleme plus dur)
@@ -146,11 +146,52 @@ class PixelJob : public Job {
 	Color *pixels;
 
 	public:
-		 PixelJob(const Scene::screen_t &scr, Scene sce, int x_, int y_, vector<Vec3D> l, Color *p): screen(scr), scene(sce), x(x_), y(y_), lights(l), pixels(p) {}
+		 PixelJob(const Scene::screen_t &scr, Scene &sce, int x_, int y_, vector<Vec3D> &l, Color *p): screen(scr), scene(sce), x(x_), y(y_), lights(l), pixels(p) {}
 		~PixelJob() {}
 
 };
 
+class LineJob : public Job {
+	void calcul() {
+		for (int  y = 0 ; y < scene.getHeight() ; y++) {
+			// le point de l'ecran par lequel passe ce rayon
+			auto & screenPoint = screen[y][x];
+			// le rayon a inspecter
+			Rayon  ray(scene.getCameraPos(), screenPoint);
+			int targetSphere = findClosestInter(scene, ray);
+
+			if (targetSphere == -1) {
+				// keep background color
+				continue ;
+					
+			} else {
+				const Sphere & obj = *(scene.begin() + targetSphere);
+				// pixel prend la couleur de l'objet
+				Color finalcolor = computeColor(obj, ray, scene.getCameraPos(), lights);
+				// le point de l'image (pixel) dont on vient de calculer la couleur
+				Color & pixel = pixels[y*scene.getHeight() + x];
+				// mettre a jour la couleur du pixel dans l'image finale.
+				pixel = finalcolor;
+			}
+		}
+	}
+
+	void run() {
+		calcul();
+	}
+
+	const Scene::screen_t &screen;
+	Scene &scene;
+	//x=0
+	int x;
+	vector<Vec3D> &lights;
+	Color *pixels;
+
+	public:
+		LineJob(const Scene::screen_t &scr, Scene &sce, int x_, vector<Vec3D> &l, Color *p): screen(scr), scene(sce), x(x_), lights(l), pixels(p) {}
+		~LineJob() {}
+
+};
 
 
 
@@ -192,39 +233,50 @@ int main () {
 
 	// pour chaque pixel, calculer sa couleur
 	for (int x =0 ; x < scene.getWidth() ; x++) {
-		for (int  y = 0 ; y < scene.getHeight() ; y++) {
-			if(MODE == 0) { //BASE
-				// le point de l'ecran par lequel passe ce rayon
-				auto & screenPoint = screen[y][x];
-				// le rayon a inspecter
-				Rayon  ray(scene.getCameraPos(), screenPoint);
-				int targetSphere = findClosestInter(scene, ray);
+		if(MODE==2) { //line
+			LineJob *lj = new LineJob(screen, scene, x, lights, pixels);
+			p.submit(lj);
+		}
+		else { //normal ou pixel
 
-				if (targetSphere == -1) {
-					// keep background color
-					continue ;
-					
-				} else {
-					const Sphere & obj = *(scene.begin() + targetSphere);
-					// pixel prend la couleur de l'objet
-					Color finalcolor = computeColor(obj, ray, scene.getCameraPos(), lights);
-					// le point de l'image (pixel) dont on vient de calculer la couleur
-					Color & pixel = pixels[y*scene.getHeight() + x];
-					// mettre a jour la couleur du pixel dans l'image finale.
-					pixel = finalcolor;
+			for (int  y = 0 ; y < scene.getHeight() ; y++) {
+				if(MODE == 0) { //BASE
+					// le point de l'ecran par lequel passe ce rayon
+					auto & screenPoint = screen[y][x];
+					// le rayon a inspecter
+					Rayon  ray(scene.getCameraPos(), screenPoint);
+					int targetSphere = findClosestInter(scene, ray);
+
+					if (targetSphere == -1) {
+						// keep background color
+						continue ;
+						
+					} else {
+						const Sphere & obj = *(scene.begin() + targetSphere);
+						// pixel prend la couleur de l'objet
+						Color finalcolor = computeColor(obj, ray, scene.getCameraPos(), lights);
+						// le point de l'image (pixel) dont on vient de calculer la couleur
+						Color & pixel = pixels[y*scene.getHeight() + x];
+						// mettre a jour la couleur du pixel dans l'image finale.
+						pixel = finalcolor;
+					}
+
 				}
-
-			}
-			else if(MODE == 1) { //PIXEL
-				PixelJob *pxl = new PixelJob(std::ref(screen), std::ref(scene), x, y, std::ref(lights), std::ref(pixels));
-				p.submit(pxl);
+				else if(MODE == 1) { //PIXEL
+					PixelJob *pxl = new PixelJob(screen, scene, x, y, lights, pixels);
+					p.submit(pxl);
+				}
+				else {
+					std::cout << "pouet" << std::endl;
+					exit(1);
+				}
 			}
 		}
 	}
 	/* MODE=1 //PIXEL
 	*/
 	std::cout << "fin" << std::endl;
-	queue.set_blocking(false);
+	//queue.set_blocking(false);
 	p.stop();
 
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
