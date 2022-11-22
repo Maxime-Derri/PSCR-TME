@@ -11,7 +11,7 @@ class battle {
     public:
         int vie;
         battle(int v): vie(v) {
-            srand(time(NULL)); //setting seed for rand()
+            srand(time(NULL)); //seed pour rand()
         }
         void attaque(pid_t adversaire);
         void defense();

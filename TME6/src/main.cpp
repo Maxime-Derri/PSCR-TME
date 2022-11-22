@@ -8,7 +8,7 @@
 
 #include "rsleep.h"
 
-//#include "sig_battle.hpp"
+//#include "sig_battle.hpp" -> mauvaise implementation de base a causes de l'attribue vie / handler
 
 #define TIME 2
 
@@ -28,15 +28,15 @@ void handler_luke(int sig) {
 
 
 void attaque(pid_t adversaire) {
-    //setting handler (and global vie_tmp for passing param...)
+    //preparer le handler
     if(signal(SIGINT, handler_sigint) == SIG_ERR) {
         perror("signal | perdu");
         exit(0);
     }
 
-    //sending SIGINT signal to adversaire
+    //envoyer SIGINT a adversaire
     if(kill(adversaire, SIGINT) < 0) {
-        //adversaire is dead
+        //adversaire dead
         std::cout << adversaire << " is dead" << std::endl;
 
         exit(0);
@@ -49,7 +49,7 @@ void attaque(pid_t adversaire) {
 void defense(pid_t my_pid) {
     sigset_t old;
     if(my_pid)
-        signal(SIGINT, SIG_IGN); //ignoring SIGINT
+        signal(SIGINT, SIG_IGN); //ignorer SIGINT
     else {
         struct sigaction act;
         sigset_t sig;
@@ -94,7 +94,7 @@ void combat(pid_t adversaire, pid_t my_pid) {
 //------
 
 int main(int argc, char **argv) {
-    srand(time(NULL)); //setting seed for rand()
+    srand(time(NULL)); //seed pour rand()
     pid_t child;
     child = fork();
     switch (child) {
@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
             break;
 
         case 0: //child -> luke
-            srand(time(NULL)); //new seed for child
+            srand(time(NULL)); //nouveau seed
             combat(getppid(), child);
             break;
 
@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
 
 
 
-    return 0; //never reach ?
+    return 0; //jamais atteint ?
 }
 
 //Q4

@@ -20,15 +20,15 @@ void handle_sigint(int sig) {
 
 
 void battle::attaque(pid_t adversaire) {
-    //setting handler (and global vie_tmp for passing param...)
+    //preparer handler et global vie_tmp
     vie_tmp = vie;
     if(signal(SIGINT, handle_sigint) == SIG_ERR) {
         perror("signal");
     }
 
-    //sending SIGINT signal to adversaire
+    //envoyer SIGINT a adversaire
     if(kill(adversaire, SIGINT) < 0) {
-        //adversaire is dead
+        //adversaire dead
         std::cout << adversaire << " is dead" << std::endl;
         exit(0);
     }
@@ -39,7 +39,7 @@ void battle::attaque(pid_t adversaire) {
 }
 
 void battle::defense() {
-    signal(SIGINT, SIG_IGN); //ignoring SIGINT
+    signal(SIGINT, SIG_IGN); //ignorer SIGINT
 
     std::this_thread::sleep_for(std::chrono::seconds(rand() % TIME));
 }
