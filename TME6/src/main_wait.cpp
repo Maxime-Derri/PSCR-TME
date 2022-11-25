@@ -55,50 +55,27 @@ void handler_chd(int sig) {
 
 //utiliser alarm(), signal et les masques de signaux
 int wait_till_pid3(pid_t pid, int sec) { //pb
-    sigset_t old;
     sigset_t sig;
     sigfillset(&sig);
-
-    sigprocmask(SIG_SETMASK, &sig, &old);
 
     sigdelset(&sig, SIGALRM);
     sigdelset(&sig, SIGCHLD);
     signal(SIGALRM, handler_alrm);
     signal(SIGCHLD, handler_chd);
     alarm(sec);
-    sigsuspend(&sig); //on peut avoir recu sigchild, et entre sigsuspend et sigpending sigalrm ? SIGPROCMASK regle le probleme (le mask est modifié seulement en sigsuspend et avant/apres tt est masqué)?
-                      //sigsuspend: handler déclanché mais signaux pas reset ? seul solution: var global ? cafr sigsuspend retire du mask les 2 signaux -> traitement retour mode U
-                      //=> provoque les erreurs lignes qui suivent ?
+    sigsuspend(&sig);
 
     sigset_t rec;
     sigpending(&rec);
     if(is_child) {
         alarm(0);
         signal(SIGALRM, SIG_DFL);
-        sigprocmask(SIG_SETMASK, &old, nullptr);
-        return pid;
-    }
-    else {
-        signal(SIGCHLD, SIG_DFL);
-        sigprocmask(SIG_SETMASK, &old, nullptr);
-        return 0;
-    }
-    /*
-    int test = sigismember(&rec, SIGCHLD);
-    if(test == -1) {
-        perror("sigpending / sigismember");
-        return -1;
-    }
-    else if(test) { //child
-        alarm(0);
-        signal(SIGALRM, SIG_DFL); //tj exec... utlisier une var global depuis les handers ?
         return pid;
     }
     else {
         signal(SIGCHLD, SIG_DFL);
         return 0;
     }
-    */
 
 }
 

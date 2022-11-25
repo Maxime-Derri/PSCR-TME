@@ -123,7 +123,7 @@ int main(int argc, char **argv) {
 //la boucle bloque le processus malgré les signaux reçu en relancant un appel tant que le reste (à dormir) n'est pas nul
 
 //Q5
-//srand(time(NULL)) dans chaque processus ?
+//srand(time(NULL)) dans chaque processus ou avec getpid()
 
 //Q6
 //Non il n'est plus equitable, car sigsuspend attend de recevoir un signal avant de reprendre et execute donc le handler associé (coup bloqué). Donc quand Luke
