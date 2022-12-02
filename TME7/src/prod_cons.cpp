@@ -25,11 +25,21 @@ void consomateur (Stack<char> * stack) {
 }
 
 int main () {
-	//Stack<char> * s;// = new Stack<char>();
-	Stack<char> *s =(Stack<char> *)mmap(0, sizeof(Stack<char>), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, -1, 0);
-	s = new Stack<char>;
+	Stack<char> * s; // = new Stack<char>(); //sm contient les sem
+	//emplace_new
+	//var->~c()
+	//sem nommé: standard et anonyme: non standard
+	void *addr = mmap(nullptr, sizeof(Stack<char>), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, -1, 0);
+	s = new (addr) Stack<char>();
 
-	
+	//int fd = shm_ope, ("/myshm", O_RDWR | O_CREAT | O_EXCL, 0600) //EXCL => faute si existe deja
+	//ftruncate(fd, sizeof(Stack<char/);)
+	//addr = mmap(0, siszof(Stack<char>), PROT_READ | PROT_WRITE, fd, O);
+	//mmap
+	//close(fd)
+	//munmap(adddr, sizeof(Stack<chzr>)
+	//shm_unlink("/mushm");
+
 	pid_t pp = fork();
 	if (pp==0) {
 		producteur(s);
@@ -46,7 +56,6 @@ int main () {
 	wait(0);
 
 	delete s;
-	munmap(s, sizeof(*s));
 	return 0;
 }
 
