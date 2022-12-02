@@ -12,20 +12,27 @@ Ecrivez progressivement une version avec N pro ducteurs et M consommateurs, qui
 utilise un segment de mémoire partagée nommé, et se termine proprement sur Ctrl-C
 */
 
-
+//mem partagé => on stock pas de ptr
 namespace pr {
 
 #define STACKSIZE 100
 
-template<typename T>
-class Stack {
-	T tab [STACKSIZE];
-	size_t sz;
-
+/*
+struct sem {
 	sem_t vide;
 	sem_t full;
 	sem_t sync;
+};
+*/
 
+template<typename T>
+class Stack {
+	T tab [STACKSIZE]; //size: sizeof(T) * STACKSIZE (on a STACKSIZE case T)
+	size_t sz;
+	sem_t vide;
+	sem_t full;
+	sem_t sync;
+	//sem lock;
 public :
 	Stack () : sz(0) {
 		memset(tab,0,sizeof tab) ;
@@ -66,6 +73,12 @@ public :
 		sem_post(&sync);
 
 		sem_post(&full);
+	}
+
+	~Stack() {
+		sem_destroy(&full);
+		sem_destroy(&sync);
+		sem_destroy(&vide);
 	}
 };
 
