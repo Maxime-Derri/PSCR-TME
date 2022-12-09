@@ -1,6 +1,8 @@
 #pragma once
 #include <forward_list>
 #include <vector>
+#include <mutex>
+#include <iostream>
 
 namespace pr {
 
@@ -16,6 +18,7 @@ public:
 	};
 private :
 
+	mutable std::mutex m;
 	typedef std::vector<std::forward_list<Entry> > buckets_t;
 	// stockage pour la table de buckets
 	buckets_t buckets;
@@ -28,6 +31,7 @@ public:
 	}
 
 	V* get(const K & key) {
+		std::unique_lock<std::mutex> l(m);
 		size_t h = std::hash<K>()(key);
 		size_t target = h % buckets.size();
 		for (Entry & ent : buckets[target]) {
@@ -39,6 +43,7 @@ public:
 	}
 
 	bool put (const K & key, const V & value) {
+		std::unique_lock<std::mutex> l(m);
 		size_t h = std::hash<K>()(key);
 		size_t target = h % buckets.size();
 		for (Entry & ent : buckets[target]) {
@@ -52,7 +57,10 @@ public:
 		return false;
 	}
 
-	size_t size() const { return sz ; }
+	size_t size() const {
+		std::unique_lock<std::mutex> l(m);
+		return sz ;
+	}
 };
 
 } /* namespace pr */

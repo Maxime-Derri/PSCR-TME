@@ -1,19 +1,31 @@
 #include "Semaphore.h"
 #include <thread>
 #include <vector>
+#include <iostream>
 
 // TODO : classe à modifier
 class Data {
 	std::vector<int> values;
+	mutable pr::Semaphore sem;
 public :
+	Data(): sem(256) {}
+
 	int read() const {
+		sem.acquire(1);
+		int ret = 0;
 		if (values.empty())
-			return 0;
+			ret = 0;
 		else
-			return values[rand()%values.size()];
+			ret = values[rand()%values.size()];
+
+		sem.release(1);
+		return ret;
 	}
+
 	void write() {
+		sem.acquire(256);
 		values.push_back(rand());
+		sem.release(256);
 	}
 };
 
@@ -29,7 +41,7 @@ void worker(Data & data) {
 	}
 }
 
-int main2 () {
+int main () {
 	// a faire varier
 	const int NBTHREAD=10;
 
@@ -42,6 +54,6 @@ int main2 () {
 
 	for (auto & t: threads)
 		t.join();
+	std::cout << "end !" << std::endl;
 	return 0;
 }
-

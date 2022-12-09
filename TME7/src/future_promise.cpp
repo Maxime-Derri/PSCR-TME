@@ -12,9 +12,9 @@
 //un objet future/promise qui propose un get_result, bloquant tant que le resultat n'est pas disponible
 
 int main(int argc, char *argv[]) {
-    promise<std::vector<std::string>> *v;
+    promise<int> *v;
     void *addr = mmap(NULL, sizeof(v), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, -1, 0);
-     v = new (addr) promise<std::vector<std::string>>();
+     v = new (addr) promise<int>();
 
     switch (fork()) { //1
         case -1:
@@ -22,15 +22,8 @@ int main(int argc, char *argv[]) {
             return EXIT_FAILURE;
 
         case 0: {
-            std::vector<std::string> *tmp;
-
             for(int i = 0; i < N; ++i) {
-                tmp = v->get_result();
-                std:: cout << "GET - " << std::endl;
-                for(auto &e : *tmp) {
-                    std::cout << e << " ";;
-                }
-                std::cout << std::endl;
+                std:: cout << "GET - " << v->get_result() << std::endl;
             }
             exit(EXIT_SUCCESS);
         }
@@ -46,13 +39,13 @@ int main(int argc, char *argv[]) {
             return EXIT_FAILURE;
 
         case 0: {
-            std::vector<std::string> tmp;
-            tmp = std::vector<std::string>() ;
+            int tmp;
             
             for(int i = 0; i < N; ++i) {
-                tmp.push_back("a");
+                tmp = i;
                 v->set_result(&tmp);
-                std::cout << "SET - " << std::endl;
+                std::cout << "SET - " << tmp << std::endl;
+                sleep(1);
             }
             exit(EXIT_SUCCESS);
         }

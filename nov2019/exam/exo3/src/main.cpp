@@ -7,6 +7,7 @@ using namespace std;
 using namespace pr;
 
 int main () {
+	std::cout << "begin" << endl << endl;
 	vector<string> v1;
 	v1.push_back("abc"); v1.push_back("def");
 

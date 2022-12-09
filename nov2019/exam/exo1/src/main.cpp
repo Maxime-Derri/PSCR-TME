@@ -1,6 +1,7 @@
 #include "HashMap.h"
 #include "MultiHashMap.h"
 #include <iostream>
+#include <mutex>
 
 using namespace pr;
 
